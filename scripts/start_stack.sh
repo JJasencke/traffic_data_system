@@ -10,6 +10,7 @@ SPARK_HOME="${SPARK_HOME:-/mnt/d/bigdata/apps/spark}"
 SPARK_KAFKA_PACKAGE="${SPARK_KAFKA_PACKAGE:-org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0}"
 WAIT_SECONDS="${WAIT_SECONDS:-60}"
 ENABLE_MONITOR="${ENABLE_MONITOR:-true}"
+AUTO_ATTACH="${AUTO_ATTACH:-true}"
 
 if [[ -f "${REPO_ROOT}/.env" ]]; then
   set -a
@@ -96,4 +97,8 @@ echo "[INFO] Session ready: ${SESSION_NAME}"
 echo "[INFO] Attach with: tmux attach -t ${SESSION_NAME}"
 echo "[INFO] Stop with: ${REPO_ROOT}/scripts/stop_stack.sh"
 
-exec tmux attach -t "${SESSION_NAME}"
+if [[ "${AUTO_ATTACH,,}" == "true" ]]; then
+  exec tmux attach -t "${SESSION_NAME}"
+fi
+
+echo "[INFO] AUTO_ATTACH=false, leave session in background."
