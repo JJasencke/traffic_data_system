@@ -6,7 +6,7 @@
 - 消息：Kafka
 - 计算：Spark Structured Streaming
 - 存储：HDFS（可映射 Hive）
-- 预测：SARIMA 任务入口已预留
+- 预测：SARIMA run-once 任务已实现
 
 ## 快速开始（WSL）
 
@@ -16,13 +16,19 @@
 cp .env.example .env
 ```
 
-2. 在 `.env` 至少填写：
+2. 安装依赖
+
+```bash
+pip install -r requirements.txt
+```
+
+3. 在 `.env` 至少填写：
 - `BAIDU_AK`
 - `PROJECT_ROOT`
 - `ROAD_LIST_FILE`
 - `KAFKA_BOOTSTRAP_SERVERS`
 
-3. 一键启动全链路
+4. 一键启动全链路
 
 ```bash
 bash scripts/start_stack.sh
@@ -30,13 +36,13 @@ bash scripts/start_stack.sh
 
 说明：该脚本会拉起 `tmux` 会话并自动附着（进入会话界面）。
 
-4. 一键链路检查
+5. 一键链路检查
 
 ```bash
 bash scripts/check_stack.sh
 ```
 
-5. 一键停止
+6. 一键停止
 
 ```bash
 bash scripts/stop_stack.sh
@@ -50,6 +56,7 @@ scripts/
   start_stack_ide.sh # IDE 观测模式启动（不刷日志，显示状态面板）
   attach_stack.sh  # 重新连接会话
   check_stack.sh   # 全链路冒烟检查
+  run_prediction_once.sh # 单次执行SARIMA预测作业
   stack_dashboard.py # 全链路状态仪表盘（单次/持续刷新）
   stop_stack.sh    # 停止会话和进程
 ```
@@ -68,6 +75,9 @@ STRICT=false bash scripts/check_stack.sh
 
 # 单独运行状态面板
 python scripts/stack_dashboard.py --watch
+
+# 单次执行SARIMA预测作业（run-once）
+bash scripts/run_prediction_once.sh
 ```
 
 ## 项目结构

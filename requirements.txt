@@ -1,0 +1,9 @@
+requests
+python-dotenv
+kafka-python
+pyspark
+numpy
+pandas
+statsmodels
+pytest
+typing_extensions
