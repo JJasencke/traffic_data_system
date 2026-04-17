@@ -59,6 +59,7 @@ scripts/
   start_stack_ide.sh
   attach_stack.sh
   check_stack.sh
+  run_prediction_once.sh
   stack_dashboard.py
   stop_stack.sh
 ```
@@ -80,7 +81,7 @@ cp .env.example .env
 ### 4.2 Python 依赖
 
 ```bash
-pip install requests python-dotenv kafka-python pyspark
+pip install -r requirements.txt
 ```
 
 ### 4.3 WSL 依赖
@@ -170,6 +171,18 @@ python scripts/stack_dashboard.py --watch
 python scripts/stack_dashboard.py --watch --interval 3
 ```
 
+### 5.6 单次执行预测作业（run-once）
+
+```bash
+bash scripts/run_prediction_once.sh
+```
+
+可选（指定执行时间用于回放验证）：
+
+```bash
+bash scripts/run_prediction_once.sh --now "2026-04-17 08:30:00"
+```
+
 ## 6. 脚本可配置环境变量
 
 `start_stack.sh` 相关：
@@ -202,6 +215,20 @@ export STRICT=true
 export DASHBOARD_INTERVAL=5
 ```
 
+`sarima_predict_job.py` 相关：
+
+```bash
+export PREDICTION_OUTPUT_PATH=hdfs://localhost:9000/traffic/prediction/sarima
+export PREDICTION_MODEL_DIR=/mnt/d/bigdata/myproject/models/sarima
+export PREDICTION_HISTORY_DAYS=21
+export PREDICTION_FORECAST_STEPS_15M=8
+export PREDICTION_FORECAST_STEPS_1M=30
+export PREDICTION_BIAS_WINDOW_MINUTES=60
+export PREDICTION_MIN_SAMPLES=96
+export PREDICTION_MISSING_RATE_THRESHOLD=0.20
+export PREDICTION_PEAK_WINDOWS=07:00-09:00,17:00-19:00
+```
+
 输出路径变量（用于检查 HDFS 落盘）：
 
 ```bash
@@ -230,8 +257,17 @@ bin/spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0 /mn
 bin/spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0 /mnt/d/bigdata/myproject/src/streaming/jobs/traffic_avg_speed_stream_job.py
 ```
 
+### 7.3 启动预测任务（离线run-once）
+
+```bash
+cd /mnt/d/bigdata/myproject
+source .venv/bin/activate
+export PYTHONPATH=src
+bash scripts/run_prediction_once.sh
+```
+
 ## 8. 后续建议
 
-1. 为 `prediction/jobs/sarima_predict_job.py` 实现真实预测流程。
-2. 给 `streaming/jobs` 增加基础单元测试与回放测试。
-3. 增加可视化层（地图 + 趋势图）读取聚合结果。
+1. 为预测模块增加按路段的离线回测报告（高峰 MAE、全天 MAE、回退率）。
+2. 基于 `calendar.csv` 接入节假日/调休特征，降低特殊日期预测偏差。
+3. 增加可视化层（地图 + 趋势图）读取实时与预测结果并展示置信区间。
